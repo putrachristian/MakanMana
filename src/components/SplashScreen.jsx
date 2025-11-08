@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
-import { Utensils, Pizza, Soup, Sandwich } from 'lucide-react';
+import { Pizza, Soup, Sandwich } from 'lucide-react';
 
-export default function SplashScreen({ onStart }) {
+const SplashScreen = ({ onStart }) => {
   return (
     <div className="h-full flex flex-col items-center justify-between p-8 bg-gradient-to-br from-[#FFA654] to-[#FF7F50] relative overflow-hidden">
       {/* Floating food icons */}
@@ -110,5 +110,7 @@ export default function SplashScreen({ onStart }) {
       </motion.div>
     </div>
   );
-}
+};
+
+export default SplashScreen;
 

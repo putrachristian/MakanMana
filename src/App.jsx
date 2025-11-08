@@ -8,7 +8,7 @@ import ResultsList from './components/ResultsList';
 import Favorites from './components/Favorites';
 import { Utensils } from 'lucide-react';
 
-export default function App() {
+const App = () => {
   const [screen, setScreen] = useState('splash');
   const [mode, setMode] = useState(null);
   const [location, setLocation] = useState(null);
@@ -184,10 +184,10 @@ export default function App() {
       </div>
     </div>
   );
-}
+};
 
 // Generate mock recommendations based on answers
-function generateRecommendations(answers, location, mode) {
+const generateRecommendations = (answers, location, mode) => {
   const allRestaurants = [
     {
       name: "Warung Mie Pedas Juara",
@@ -284,5 +284,7 @@ function generateRecommendations(answers, location, mode) {
   // Shuffle array and pick 3 random restaurants
   const shuffled = [...allRestaurants].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, 3);
-}
+};
+
+export default App;
 

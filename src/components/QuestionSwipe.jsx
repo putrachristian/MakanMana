@@ -53,7 +53,7 @@ const questions = [
   }
 ];
 
-export default function QuestionSwipe({ onComplete, mode, currentUser, onBack }) {
+const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [exitDirection, setExitDirection] = useState(null);
@@ -234,5 +234,7 @@ export default function QuestionSwipe({ onComplete, mode, currentUser, onBack })
       </div>
     </div>
   );
-}
+};
+
+export default QuestionSwipe;
 

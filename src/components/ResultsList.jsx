@@ -1,14 +1,14 @@
 import { motion } from 'motion/react';
 import { MapPin, Star, Heart, RefreshCw, Navigation, DollarSign, Sparkles } from 'lucide-react';
 
-export default function ResultsList({ 
+const ResultsList = ({ 
   recommendations, 
   mode, 
   onTryAgain,
   onLoadMore,
   onAddToFavorites, 
   favorites 
-}) {
+}) => {
   const handleOpenMaps = (restaurant) => {
     const query = encodeURIComponent(restaurant.name);
     window.open(`https://www.google.com/maps/search/${query}`, '_blank');
@@ -172,5 +172,7 @@ export default function ResultsList({
       </div>
     </div>
   );
-}
+};
+
+export default ResultsList;
 

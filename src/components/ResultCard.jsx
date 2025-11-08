@@ -1,8 +1,7 @@
 import { motion } from 'motion/react';
 import { MapPin, Star, Heart, RefreshCw, Navigation, Clock, DollarSign } from 'lucide-react';
-import { useState } from 'react';
 
-export default function ResultCard({ recommendation, mode, onTryAgain, onAddToFavorites, isFavorited }) {
+const ResultCard = ({ recommendation, mode, onTryAgain, onAddToFavorites, isFavorited }) => {
   const handleOpenMaps = () => {
     // Mock Google Maps link
     const query = encodeURIComponent(recommendation.name);
@@ -149,5 +148,7 @@ export default function ResultCard({ recommendation, mode, onTryAgain, onAddToFa
       </motion.div>
     </div>
   );
-}
+};
+
+export default ResultCard;
 

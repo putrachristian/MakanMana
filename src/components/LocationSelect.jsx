@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { MapPin, Building2, Loader } from 'lucide-react';
+import { MapPin, Building2 } from 'lucide-react';
 
-export default function LocationSelect({ onSelect }) {
+const LocationSelect = ({ onSelect }) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [showCityInput, setShowCityInput] = useState(false);
   const [isLoadingGPS, setIsLoadingGPS] = useState(false);
@@ -159,5 +159,7 @@ export default function LocationSelect({ onSelect }) {
       </motion.div>
     </div>
   );
-}
+};
+
+export default LocationSelect;
 

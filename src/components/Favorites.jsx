@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
-import { ArrowLeft, Star, MapPin, Trash2 } from 'lucide-react';
+import { ArrowLeft, Star, MapPin } from 'lucide-react';
 
-export default function Favorites({ favorites, onBack }) {
+const Favorites = ({ favorites, onBack }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF7ED] to-white">
       {/* Header */}
@@ -104,5 +104,7 @@ export default function Favorites({ favorites, onBack }) {
       )}
     </div>
   );
-}
+};
+
+export default Favorites;
 

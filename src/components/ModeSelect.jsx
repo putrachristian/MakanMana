@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { User, Users } from 'lucide-react';
 
-export default function ModeSelect({ onSelect }) {
+const ModeSelect = ({ onSelect }) => {
   return (
     <div className="h-full flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#FFF7ED] to-white">
       {/* Title */}
@@ -83,5 +83,7 @@ export default function ModeSelect({ onSelect }) {
       </motion.div>
     </div>
   );
-}
+};
+
+export default ModeSelect;
 

@@ -9,7 +9,7 @@ const loadingMessages = [
   "Hampir selesai! 🎉"
 ];
 
-export default function Loading({ mode }) {
+const Loading = ({ mode }) => {
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
@@ -124,5 +124,7 @@ export default function Loading({ mode }) {
       </motion.div>
     </div>
   );
-}
+};
+
+export default Loading;
 
