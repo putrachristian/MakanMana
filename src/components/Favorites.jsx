@@ -42,7 +42,7 @@ const Favorites = ({ favorites, onBack }) => {
           <div className="grid gap-4">
             {favorites.map((restaurant, index) => (
               <motion.div
-                key={index}
+                key={`${restaurant.name}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}

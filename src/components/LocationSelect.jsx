@@ -1,47 +1,11 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { MapPin, Building2 } from 'lucide-react';
+import { cities } from '../constants/cities';
 
 const LocationSelect = ({ onSelect }) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [showCityInput, setShowCityInput] = useState(false);
-  const [isLoadingGPS, setIsLoadingGPS] = useState(false);
-
-  const cities = [
-    'Jakarta',
-    'Bandung',
-    'Surabaya',
-    'Yogyakarta',
-    'Semarang',
-    'Malang',
-    'Medan',
-    'Bali'
-  ];
-
-  const handleCurrentLocation = () => {
-    onSelect({ type: 'current', radius: '5 km' });
-  };
-
-  const handleCitySelect = () => {
-    if (selectedCity) {
-      onSelect({ type: 'city', city: selectedCity });
-    }
-  };
-
-  const handleGPSLocation = () => {
-    setIsLoadingGPS(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        onSelect({ type: 'gps', latitude, longitude });
-        setIsLoadingGPS(false);
-      },
-      (error) => {
-        console.error('Error getting GPS location:', error);
-        setIsLoadingGPS(false);
-      }
-    );
-  };
 
   const modeColor = 'from-[#FF7F89] to-[#FFB6C1]';
 
@@ -71,7 +35,7 @@ const LocationSelect = ({ onSelect }) => {
           transition={{ delay: 0.2 }}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={handleCurrentLocation}
+          onClick={() => onSelect({ type: 'current', radius: '5 km' })}
           className={`w-full bg-gradient-to-br ${modeColor} p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all text-left relative overflow-hidden`}
         >
           <div className="absolute top-0 right-0 text-white/10 transform translate-x-4 -translate-y-4">
@@ -135,7 +99,11 @@ const LocationSelect = ({ onSelect }) => {
                 ))}
               </select>
               <button
-                onClick={handleCitySelect}
+                onClick={() => {
+                  if (selectedCity) {
+                    onSelect({ type: 'city', city: selectedCity });
+                  }
+                }}
                 disabled={!selectedCity}
                 className="w-full bg-[#FFA654] text-white py-3.5 rounded-full font-['Poppins'] font-semibold hover:bg-[#FF8C42] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
               >
@@ -162,4 +130,3 @@ const LocationSelect = ({ onSelect }) => {
 };
 
 export default LocationSelect;
-

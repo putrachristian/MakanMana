@@ -1,68 +1,28 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Check, ArrowLeft, Home } from 'lucide-react';
-
-const questions = [
-  {
-    id: 1,
-    question: "Lagi pengen yang pedas gak?",
-    emoji: "🌶️",
-    image: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=800"
-  },
-  {
-    id: 2,
-    question: "Mau makanan berkuah atau yang kering?",
-    emoji: "🍜",
-    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800",
-    options: { left: "Kering", right: "Berkuah" }
-  },
-  {
-    id: 3,
-    question: "Lagi pengen makan nasi atau bukan nasi?",
-    emoji: "🍚",
-    image: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=800",
-    options: { left: "Bukan Nasi", right: "Nasi" }
-  },
-  {
-    id: 4,
-    question: "Lagi pengen makanan lokal atau internasional?",
-    emoji: "🌍",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",
-    options: { left: "Internasional", right: "Lokal" }
-  },
-  {
-    id: 5,
-    question: "Budget makan hari ini?",
-    emoji: "💰",
-    image: "https://images.unsplash.com/photo-1554224311-beee460c201f?w=800",
-    options: { left: "Hemat < 50k", right: "Bebas > 50k" }
-  },
-  {
-    id: 6,
-    question: "Lagi pengen suasana tenang atau ramai?",
-    emoji: "🎭",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
-    options: { left: "Tenang", right: "Ramai" }
-  },
-  {
-    id: 7,
-    question: "Lagi mau makan di tempat atau dibawa pulang?",
-    emoji: "🏠",
-    image: "https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=800",
-    options: { left: "Dibawa Pulang", right: "Di Tempat" }
-  }
-];
+import { questions } from '../constants/questions';
 
 const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [exitDirection, setExitDirection] = useState(null);
+  const timeoutRef = useRef(null);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
   const currentQuestion = questions[currentIndex];
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSwipe = (direction) => {
     const answer = {
@@ -71,16 +31,24 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
       answer: direction === 'right' ? 'yes' : 'no'
     };
 
+    const newAnswers = [...answers, answer];
     setExitDirection(direction);
-    setAnswers([...answers, answer]);
+    setAnswers(newAnswers);
 
-    setTimeout(() => {
-      if (currentIndex < questions.length - 1) {
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      const isLastQuestion = currentIndex >= questions.length - 1;
+      if (isLastQuestion) {
+        onComplete(newAnswers);
+      } else {
         setCurrentIndex(currentIndex + 1);
         setExitDirection(null);
-      } else {
-        onComplete([...answers, answer]);
       }
+      timeoutRef.current = null;
     }, 300);
   };
 
@@ -88,20 +56,6 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setAnswers(answers.slice(0, -1));
-    }
-  };
-
-  const handleBackToMenu = () => {
-    if (window.confirm('Kembali ke menu utama? Progress akan hilang.')) {
-      onBack();
-    }
-  };
-
-  const handleDragEnd = (event, info) => {
-    if (info.offset.x > 100) {
-      handleSwipe('right');
-    } else if (info.offset.x < -100) {
-      handleSwipe('left');
     }
   };
 
@@ -145,7 +99,13 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
             style={{ x, rotate, opacity }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={handleDragEnd}
+            onDragEnd={(event, info) => {
+              if (info.offset.x > 100) {
+                handleSwipe('right');
+              } else if (info.offset.x < -100) {
+                handleSwipe('left');
+              }
+            }}
             className="absolute w-full max-w-sm h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
           >
             {/* Image */}
@@ -225,7 +185,11 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleBackToMenu}
+          onClick={() => {
+            if (window.confirm('Kembali ke menu utama? Progress akan hilang.')) {
+              onBack();
+            }
+          }}
           className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-600 py-3 rounded-full font-['Poppins'] font-semibold hover:border-[#FFA654] hover:text-[#FFA654] transition-colors"
         >
           <Home className="w-4 h-4" />
@@ -237,4 +201,3 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
 };
 
 export default QuestionSwipe;
-

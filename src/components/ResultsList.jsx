@@ -14,9 +14,8 @@ const ResultsList = ({
     window.open(`https://www.google.com/maps/search/${query}`, '_blank');
   };
 
-  const isFavorited = (restaurant) => {
-    return favorites.some(f => f.name === restaurant.name);
-  };
+  const isFavorited = (restaurant) => 
+    favorites.some(f => f.name === restaurant.name);
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF7ED] to-white">
@@ -46,7 +45,7 @@ const ResultsList = ({
         <div className="space-y-4">
           {recommendations.map((restaurant, index) => (
             <motion.div
-              key={index}
+              key={`${restaurant.name}-${index}`}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
