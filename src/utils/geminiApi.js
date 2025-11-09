@@ -325,7 +325,7 @@ PENTING: Cari restoran di seluruh kota ${location.city}, bukan hanya area terten
 
     // Generate content using GoogleGenAI with systemInstruction and tools in config
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash-lite',
       contents: contents,
       config: {
         systemInstruction: systemInstruction,

@@ -11,6 +11,8 @@ import { Utensils } from 'lucide-react';
 import { generateRecommendations } from './utils/recommendations';
 import { generateQuestions } from './utils/geminiApi';
 import { questions as defaultQuestions } from './constants/questions';
+import InstallPrompt from './components/InstallPrompt';
+import Toaster from './components/Toaster';
 
 const App = () => {
   const [screen, setScreen] = useState('splash');
@@ -343,6 +345,8 @@ const App = () => {
           {renderScreen()}
         </div>
       </div>
+      <InstallPrompt />
+      <Toaster />
     </div>
   );
 };

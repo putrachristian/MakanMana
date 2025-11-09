@@ -2,7 +2,7 @@
 
 **MakanMana?** adalah aplikasi web berbasis AI yang membantu kamu menemukan restoran yang cocok berdasarkan preferensi makanan kamu. Aplikasi ini menggunakan Google Gemini AI untuk menghasilkan pertanyaan personalisasi dan memberikan rekomendasi restoran yang sesuai dengan selera kamu.
 
-🌐 **Live URL:** [makanmana.vercel.app](https://makanmana.vercel.app)
+🌐 **Live URL:** [makanmana-app.vercel.app](https://makanmana-app.vercel.app)
 
 ## 🎯 Apa itu MakanMana?
 
@@ -82,6 +82,7 @@ MakanMana? adalah solusi untuk masalah klasik: **"Mau makan apa hari ini?"**. Ap
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Deployment**: Vercel
+- **PWA**: Progressive Web App support dengan offline capability
 
 ## 💡 Keunggulan
 
