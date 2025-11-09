@@ -1,13 +1,66 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { MapPin, Building2 } from 'lucide-react';
+import { MapPin, Building2, Loader2 } from 'lucide-react';
 import { cities } from '../constants/cities';
 
 const LocationSelect = ({ onSelect }) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [showCityInput, setShowCityInput] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
   const modeColor = 'from-[#FF7F89] to-[#FFB6C1]';
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation tidak didukung oleh browser kamu');
+      return;
+    }
+
+    setIsGettingLocation(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setIsGettingLocation(false);
+        onSelect({
+          type: 'current',
+          radius: '5 km',
+          coordinates: {
+            latitude,
+            longitude
+          }
+        });
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        let errorMessage = 'Gagal mendapatkan lokasi';
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Akses lokasi ditolak. Silakan izinkan akses lokasi di pengaturan browser.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Informasi lokasi tidak tersedia.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Waktu permintaan lokasi habis.';
+            break;
+          default:
+            errorMessage = 'Terjadi kesalahan saat mengambil lokasi.';
+            break;
+        }
+        
+        setLocationError(errorMessage);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#FFF7ED] to-white overflow-y-auto">
@@ -29,32 +82,54 @@ const LocationSelect = ({ onSelect }) => {
       {/* Location options */}
       <div className="w-full space-y-6 mb-8">
         {/* Current Location */}
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onSelect({ type: 'current', radius: '5 km' })}
-          className={`w-full bg-gradient-to-br ${modeColor} p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all text-left relative overflow-hidden`}
         >
-          <div className="absolute top-0 right-0 text-white/10 transform translate-x-4 -translate-y-4">
-            <MapPin className="w-32 h-32" />
-          </div>
-          <div className="relative z-10 flex items-center gap-4">
-            <div className="bg-white/20 p-4 rounded-2xl">
-              <MapPin className="w-8 h-8 text-white" />
+          <motion.button
+            whileHover={{ scale: isGettingLocation ? 1 : 1.03 }}
+            whileTap={{ scale: isGettingLocation ? 1 : 0.97 }}
+            onClick={handleGetCurrentLocation}
+            disabled={isGettingLocation}
+            className={`w-full bg-gradient-to-br ${modeColor} p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all text-left relative overflow-hidden ${isGettingLocation ? 'opacity-75 cursor-wait' : ''}`}
+          >
+            <div className="absolute top-0 right-0 text-white/10 transform translate-x-4 -translate-y-4">
+              <MapPin className="w-32 h-32" />
             </div>
-            <div>
-              <h3 className="text-xl font-['Poppins'] font-semibold text-white mb-1">
-                📍 Gunakan Lokasi Sekarang
-              </h3>
-              <p className="text-white/90 font-['Poppins'] text-sm">
-                Rekomendasi dalam radius 5 km dari posisimu
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="bg-white/20 p-4 rounded-2xl">
+                {isGettingLocation ? (
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                ) : (
+                  <MapPin className="w-8 h-8 text-white" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-['Poppins'] font-semibold text-white mb-1">
+                  📍 Gunakan Lokasi Sekarang
+                </h3>
+                <p className="text-white/90 font-['Poppins'] text-sm">
+                  {isGettingLocation 
+                    ? 'Mengambil lokasi kamu...' 
+                    : 'Rekomendasi dalam radius 5 km dari posisimu'}
+                </p>
+              </div>
+            </div>
+          </motion.button>
+          
+          {locationError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 p-4 bg-red-50 border border-red-200 rounded-xl"
+            >
+              <p className="text-red-600 font-['Poppins'] text-sm text-center">
+                ⚠️ {locationError}
               </p>
-            </div>
-          </div>
-        </motion.button>
+            </motion.div>
+          )}
+        </motion.div>
 
         {/* Manual City Selection */}
         <motion.div

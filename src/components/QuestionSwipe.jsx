@@ -1,11 +1,10 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { X, Check, ArrowLeft, Home } from 'lucide-react';
-import { questions } from '../constants/questions';
 
-const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
+const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [exitDirection, setExitDirection] = useState(null);
   const timeoutRef = useRef(null);
 
@@ -13,7 +12,7 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = questions && questions[currentIndex];
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -25,13 +24,12 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
   }, []);
 
   const handleSwipe = (direction) => {
-    const answer = {
-      questionId: currentQuestion.id,
-      question: currentQuestion.question,
-      answer: direction === 'right' ? 'yes' : 'no'
+    const answerValue = direction === 'right' ? 'yes' : 'no';
+    const newAnswers = {
+      ...answers,
+      [currentQuestion.question]: answerValue
     };
-
-    const newAnswers = [...answers, answer];
+    
     setExitDirection(direction);
     setAnswers(newAnswers);
 
@@ -54,10 +52,36 @@ const QuestionSwipe = ({ onComplete, mode, currentUser, onBack }) => {
 
   const handleBackToPrevious = () => {
     if (currentIndex > 0) {
+      const newAnswers = { ...answers };
+      // Remove answer for current question before going back
+      delete newAnswers[currentQuestion.question];
       setCurrentIndex(currentIndex - 1);
-      setAnswers(answers.slice(0, -1));
+      setAnswers(newAnswers);
     }
   };
+
+  // Safety check: if no questions or current question is missing
+  if (!questions || questions.length === 0 || !currentQuestion) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#FFA654] to-[#FF7F50]">
+        <div className="text-center text-white">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-['Poppins'] font-semibold mb-2">
+            Tidak ada pertanyaan
+          </h2>
+          <p className="text-lg opacity-90 mb-4">
+            Terjadi kesalahan saat memuat pertanyaan
+          </p>
+          <button
+            onClick={onBack}
+            className="bg-white text-[#FFA654] px-6 py-3 rounded-full font-['Poppins'] font-semibold shadow-lg hover:shadow-xl transition-all"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const progress = ((currentIndex + 1) / questions.length) * 100;
   const modeColor = mode === 'duet' ? 'bg-[#FF7F89]' : 'bg-[#FFA654]';

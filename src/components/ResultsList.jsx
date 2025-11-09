@@ -10,8 +10,10 @@ const ResultsList = ({
   favorites 
 }) => {
   const handleOpenMaps = (restaurant) => {
-    const query = encodeURIComponent(restaurant.name);
-    window.open(`https://www.google.com/maps/search/${query}`, '_blank');
+    // Use Google Maps URL from recommendation if available
+    if (restaurant.googleMapsUrl) {
+      window.open(restaurant.googleMapsUrl, '_blank');
+    }
   };
 
   const isFavorited = (restaurant) => 
@@ -52,45 +54,47 @@ const ResultsList = ({
               className="bg-white rounded-2xl shadow-lg overflow-hidden"
             >
               {/* Image */}
-              <div className="relative h-48">
-                <img
-                  src={restaurant.image}
-                  alt={restaurant.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                
-                {/* Favorite button */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => onAddToFavorites(restaurant)}
-                  className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-                    isFavorited(restaurant) ? 'bg-red-500' : 'bg-white'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${isFavorited(restaurant) ? 'text-white fill-white' : 'text-red-500'}`} />
-                </motion.button>
+              {restaurant.image && (
+                <div className="relative h-48">
+                  <img
+                    src={restaurant.image}
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  
+                  {/* Favorite button */}
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onAddToFavorites(restaurant)}
+                    className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+                      isFavorited(restaurant) ? 'bg-red-500' : 'bg-white'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isFavorited(restaurant) ? 'text-white fill-white' : 'text-red-500'}`} />
+                  </motion.button>
 
-                {/* Restaurant name & rating */}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="text-xl font-['Poppins'] font-semibold text-white mb-1">
-                    {restaurant.name}
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      <span className="font-['Poppins'] font-semibold text-white text-sm">
-                        {restaurant.rating}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-white text-sm">
-                      <MapPin className="w-3 h-3" />
-                      <span className="font-['Poppins']">{restaurant.distance} dari kamu</span>
+                  {/* Restaurant name & rating */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="text-xl font-['Poppins'] font-semibold text-white mb-1">
+                      {restaurant.name}
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        <span className="font-['Poppins'] font-semibold text-white text-sm">
+                          {restaurant.rating}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-white text-sm">
+                        <MapPin className="w-3 h-3" />
+                        <span className="font-['Poppins']">{restaurant.distance} dari kamu</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Details */}
               <div className="p-4">
@@ -125,15 +129,17 @@ const ResultsList = ({
                 </div>
 
                 {/* Map button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleOpenMaps(restaurant)}
-                  className="w-full bg-gradient-to-r from-[#FFA654] to-[#FF8C42] text-white py-3 rounded-full font-['Poppins'] font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
-                >
-                  <Navigation className="w-4 h-4" />
-                  Lihat di Google Maps
-                </motion.button>
+                {restaurant.googleMapsUrl && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOpenMaps(restaurant)}
+                    className="w-full bg-gradient-to-r from-[#FFA654] to-[#FF8C42] text-white py-3 rounded-full font-['Poppins'] font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    Lihat di Google Maps
+                  </motion.button>
+                )}
               </div>
             </motion.div>
           ))}
