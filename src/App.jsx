@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SplashScreen from './components/SplashScreen';
 import ModeSelect from './components/ModeSelect';
 import LocationSelect from './components/LocationSelect';
@@ -24,19 +24,85 @@ export default function App() {
   const [questions, setQuestions] = useState(defaultQuestions);
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
   const userAAnswersRef = useRef({});
+  const isNavigatingRef = useRef(false);
+
+  // Initialize history state and handle browser back/forward buttons
+  useEffect(() => {
+    // Set initial history state
+    const initialState = {
+      screen: 'splash',
+      mode: null,
+      location: null,
+      previousScreen: null
+    };
+    window.history.replaceState(initialState, '', window.location.href);
+
+    // Handle browser back/forward buttons
+    const handlePopState = (event) => {
+      if (event.state) {
+        isNavigatingRef.current = true;
+        const state = event.state;
+        
+        // Restore screen state
+        setScreen(state.screen);
+        
+        // Restore mode and location if available
+        if (state.mode) setMode(state.mode);
+        if (state.location) setLocation(state.location);
+        
+        // Handle special cases
+        if (state.screen === 'splash') {
+          // Reset to initial state when going back to splash
+          setMode(null);
+          setLocation(null);
+          setUserAAnswers({});
+          setUserBAnswers({});
+          userAAnswersRef.current = {};
+          setCurrentUser('A');
+          setRecommendations([]);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Helper function to update screen and history
+  const navigateToScreen = (newScreen, stateData = {}) => {
+    // Don't add history entry if we're navigating from browser back/forward
+    if (!isNavigatingRef.current) {
+      const newState = {
+        screen: newScreen,
+        mode: stateData.mode !== undefined ? stateData.mode : mode,
+        location: stateData.location !== undefined ? stateData.location : location,
+        previousScreen: screen
+      };
+      
+      // Push new state to browser history
+      window.history.pushState(newState, '', window.location.href);
+    } else {
+      isNavigatingRef.current = false;
+    }
+    
+    setScreen(newScreen);
+    if (stateData.mode !== undefined) setMode(stateData.mode);
+    if (stateData.location !== undefined) setLocation(stateData.location);
+  };
 
   const handleStart = () => {
-    setScreen('location');
+    navigateToScreen('location');
   };
 
   const handleLocationSelect = (selectedLocation) => {
-    setLocation(selectedLocation);
-    setScreen('mode');
+    navigateToScreen('mode', { location: selectedLocation });
   };
 
   const handleModeSelect = async (selectedMode) => {
-    setMode(selectedMode);
-    setScreen('questions');
+    navigateToScreen('questions', { mode: selectedMode });
     setCurrentUser('A');
     setUserAAnswers({});
     setUserBAnswers({});
@@ -57,15 +123,15 @@ export default function App() {
   const handleQuestionsComplete = async (answers) => {
     if (mode === 'solo') {
       setUserAAnswers(answers);
-      setScreen('loading');
+      navigateToScreen('loading');
       try {
         const results = await generateRecommendations(answers, location, mode);
         setRecommendations(results);
-        setScreen('result');
+        navigateToScreen('result');
       } catch (error) {
         console.error('Error generating recommendations:', error);
         setRecommendations([]);
-        setScreen('result');
+        navigateToScreen('result');
       }
     } else {
       // Duet mode
@@ -73,10 +139,10 @@ export default function App() {
         setUserAAnswers(answers);
         userAAnswersRef.current = answers;
         setCurrentUser('B');
-        setScreen('userSwitch');
+        navigateToScreen('userSwitch');
       } else {
         setUserBAnswers(answers);
-        setScreen('loading');
+        navigateToScreen('loading');
         try {
           const duetAnswers = {
             user1: userAAnswersRef.current,
@@ -84,24 +150,22 @@ export default function App() {
           };
           const results = await generateRecommendations(duetAnswers, location, mode);
           setRecommendations(results);
-          setScreen('result');
+          navigateToScreen('result');
         } catch (error) {
           console.error('Error generating recommendations:', error);
           setRecommendations([]);
-          setScreen('result');
+          navigateToScreen('result');
         }
       }
     }
   };
 
   const handleUserBStart = () => {
-    setScreen('questions');
+    navigateToScreen('questions');
   };
 
   const handleTryAgain = () => {
-    setScreen('mode');
-    setMode(null);
-    setLocation(null);
+    navigateToScreen('mode', { mode: null, location: null });
     setUserAAnswers({});
     setUserBAnswers({});
     userAAnswersRef.current = {};
@@ -110,9 +174,7 @@ export default function App() {
   };
 
   const handleBackToMenu = () => {
-    setScreen('location');
-    setMode(null);
-    setLocation(null);
+    navigateToScreen('location', { mode: null, location: null });
     setUserAAnswers({});
     setUserBAnswers({});
     userAAnswersRef.current = {};
@@ -121,16 +183,16 @@ export default function App() {
   };
 
   const handleLoadMore = async () => {
-    setScreen('loading');
+    navigateToScreen('loading');
     try {
       const answers = mode === 'solo' ? userAAnswers : { user1: userAAnswers, user2: userBAnswers };
       const results = await generateRecommendations(answers, location, mode);
       setRecommendations(results);
-      setScreen('result');
+      navigateToScreen('result');
     } catch (error) {
       console.error('Error generating recommendations:', error);
       setRecommendations([]);
-      setScreen('result');
+      navigateToScreen('result');
     }
   };
 
@@ -141,11 +203,11 @@ export default function App() {
   };
 
   const handleViewFavorites = () => {
-    setScreen('favorites');
+    navigateToScreen('favorites');
   };
 
   const handleBackToResult = () => {
-    setScreen('result');
+    navigateToScreen('result');
   };
 
   // Show loading screen while generating questions

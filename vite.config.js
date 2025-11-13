@@ -7,6 +7,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Cache version - increment this when you want to invalidate all caches
+const CACHE_VERSION = '1.0.1';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -25,19 +28,19 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icon-192x192.png',
+            src: 'pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: 'icon-512x512.png',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: 'icon-512x512.png',
+            src: 'maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -54,7 +57,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/images\.pexels\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'pexels-images',
+              cacheName: `pexels-images-${CACHE_VERSION}`,
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
@@ -68,7 +71,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'images',
+              cacheName: `images-${CACHE_VERSION}`,
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -79,7 +82,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/serpapi\.com\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'serpapi-cache',
+              cacheName: `serpapi-cache-${CACHE_VERSION}`,
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60, // 1 hour

@@ -69,6 +69,9 @@ if (!self.define) {
 }
 define(['./workbox-47da91e0'], (function (workbox) { 'use strict';
 
+  // Cache version - increment this when you want to invalidate all caches
+  const CACHE_VERSION = '1.0.1';
+
   self.skipWaiting();
   workbox.clientsClaim();
 
@@ -90,7 +93,7 @@ define(['./workbox-47da91e0'], (function (workbox) { 'use strict';
     denylist: [/^\/_/, /\/[^/?]+\.[^/]+$/]
   }));
   workbox.registerRoute(/^https:\/\/images\.pexels\.com\/.*/i, new workbox.CacheFirst({
-    "cacheName": "pexels-images",
+    "cacheName": `pexels-images-${CACHE_VERSION}`,
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 50,
       maxAgeSeconds: 2592000
@@ -99,14 +102,14 @@ define(['./workbox-47da91e0'], (function (workbox) { 'use strict';
     })]
   }), 'GET');
   workbox.registerRoute(/^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/i, new workbox.CacheFirst({
-    "cacheName": "images",
+    "cacheName": `images-${CACHE_VERSION}`,
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 100,
       maxAgeSeconds: 604800
     })]
   }), 'GET');
   workbox.registerRoute(/^https:\/\/serpapi\.com\/.*/i, new workbox.NetworkFirst({
-    "cacheName": "serpapi-cache",
+    "cacheName": `serpapi-cache-${CACHE_VERSION}`,
     "networkTimeoutSeconds": 10,
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 50,
