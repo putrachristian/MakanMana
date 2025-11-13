@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 
 const loadingMessages = [
-  "AI sedang membaca selera kamu hari ini…",
+  "Sedang membaca selera kamu hari ini…",
   "Menyesuaikan mood makannya 🍜💞",
   "Sebentar lagi ketemu tempat yang cocok!",
   "Mencari tempat makan terbaik untukmu…",
