@@ -1,110 +1,99 @@
 import { motion } from 'motion/react';
-import { ArrowLeft, Star, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, Star, ExternalLink } from 'lucide-react';
 
-const Favorites = ({ favorites, onBack }) => {
+export default function Favorites({ favorites, onBack }) {
+  const handleOpenMaps = (restaurant) => {
+    const query = encodeURIComponent(restaurant.name);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  };
+
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF7ED] to-white">
+    <div className="h-full overflow-y-auto bg-gradient-to-b from-[#FFF7ED] to-white p-4 sm:p-6">
       {/* Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={onBack}
-            className="w-10 h-10 bg-[#FFA654] rounded-full flex items-center justify-center text-white hover:bg-[#FF8C42] transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h2 className="text-2xl font-['Poppins'] font-semibold text-[#FFA654]">
-            Tempat Favorit
-          </h2>
-        </div>
-        <p className="text-gray-600 font-['Poppins'] text-sm ml-13">
-          {favorites.length} tempat tersimpan
-        </p>
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={onBack}
+          className="w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow-md flex items-center justify-center text-[#FFA654]"
+        >
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </motion.button>
+        <h2 className="text-xl sm:text-2xl font-['Poppins'] font-semibold text-[#FFA654]">
+          Favorit Saya
+        </h2>
       </div>
 
       {/* Favorites list */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
-        {favorites.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="h-full flex flex-col items-center justify-center text-center"
-          >
-            <div className="text-6xl mb-4">💔</div>
-            <h3 className="text-xl font-['Poppins'] font-semibold text-gray-700 mb-2">
-              Belum ada favorit
-            </h3>
-            <p className="text-gray-500 font-['Poppins']">
-              Mulai cari tempat makan dan simpan favoritmu!
-            </p>
-          </motion.div>
-        ) : (
-          <div className="grid gap-4">
-            {favorites.map((restaurant, index) => (
-              <motion.div
-                key={`${restaurant.name}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <div className="flex">
-                  {/* Image */}
-                  <div className="w-32 h-32 flex-shrink-0">
-                    <img
-                      src={restaurant.image}
-                      alt={restaurant.name}
-                      className="w-full h-full object-cover"
-                    />
+      {favorites.length === 0 ? (
+        <div className="text-center py-8 sm:py-12">
+          <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">💔</div>
+          <h3 className="text-lg sm:text-xl font-['Poppins'] font-semibold text-gray-700 mb-2">
+            Belum ada favorit
+          </h3>
+          <p className="text-sm sm:text-base text-gray-500 font-['Poppins'] px-4">
+            Tambahkan restoran favoritmu dari hasil rekomendasi!
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3 sm:space-y-4">
+          {favorites.map((restaurant, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden"
+            >
+              {/* Image */}
+              <div className="relative h-32 sm:h-40">
+                <img
+                  src={restaurant.image}
+                  alt={restaurant.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white px-2 sm:px-3 py-1 rounded-full flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="font-['Poppins'] font-semibold text-xs sm:text-sm">{restaurant.rating}</span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-3 sm:p-4">
+                <h3 className="font-['Poppins'] font-semibold text-base sm:text-lg text-gray-800 mb-1.5 sm:mb-2">
+                  {restaurant.name}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-['Poppins'] mb-2 sm:mb-3">
+                  {restaurant.description}
+                </p>
+
+                {/* Info grid */}
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-600">
+                    <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FFA654]" />
+                    <span className="font-['Poppins']">{restaurant.distance}</span>
                   </div>
-
-                  {/* Info */}
-                  <div className="flex-1 p-4 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-['Poppins'] font-semibold text-gray-800 mb-1 line-clamp-1">
-                        {restaurant.name}
-                      </h3>
-                      <div className="flex items-center gap-3 text-sm mb-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          <span className="font-['Poppins']">{restaurant.rating}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-gray-600">
-                          <MapPin className="w-3 h-3" />
-                          <span className="font-['Poppins']">{restaurant.distance}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 font-['Poppins'] line-clamp-2">
-                        {restaurant.description}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs bg-[#FFA654]/10 text-[#FFA654] px-2 py-1 rounded-full font-['Poppins']">
-                        {restaurant.category}
-                      </span>
-                    </div>
+                  <div className="text-xs text-gray-600 font-['Poppins']">
+                    {restaurant.category}
+                  </div>
+                  <div className="text-xs text-gray-600 font-['Poppins'] col-span-2">
+                    💰 {restaurant.priceRange}
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Bottom tip */}
-      {favorites.length > 0 && (
-        <div className="p-6 pt-0">
-          <div className="bg-[#FFF7ED] p-4 rounded-2xl">
-            <p className="text-sm text-gray-600 font-['Poppins'] text-center">
-              💡 Klik tempat favorit untuk melihat di Google Maps
-            </p>
-          </div>
+                {/* Maps button */}
+                <button
+                  onClick={() => handleOpenMaps(restaurant)}
+                  className="w-full bg-[#FFA654] text-white py-2 sm:py-2.5 rounded-xl font-['Poppins'] font-semibold hover:bg-[#FF8C42] transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Buka di Google Maps
+                </button>
+              </div>
+            </motion.div>
+          ))}
         </div>
       )}
     </div>
   );
-};
-
-export default Favorites;
-
+}

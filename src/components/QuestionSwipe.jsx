@@ -1,12 +1,11 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { X, Check, ArrowLeft, Home } from 'lucide-react';
 
-const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => {
+export default function QuestionSwipe({ questions, onComplete, mode, currentUser, onBack }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState([]);
   const [exitDirection, setExitDirection] = useState(null);
-  const timeoutRef = useRef(null);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
@@ -14,53 +13,52 @@ const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => 
 
   const currentQuestion = questions && questions[currentIndex];
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleSwipe = (direction) => {
-    const answerValue = direction === 'right' ? 'yes' : 'no';
-    const newAnswers = {
-      ...answers,
-      [currentQuestion.question]: answerValue
+    const answer = {
+      questionId: currentQuestion.id,
+      question: currentQuestion.question,
+      answer: direction === 'right' ? 'yes' : 'no'
     };
-    
+
     setExitDirection(direction);
-    setAnswers(newAnswers);
+    setAnswers([...answers, answer]);
 
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      const isLastQuestion = currentIndex >= questions.length - 1;
-      if (isLastQuestion) {
-        onComplete(newAnswers);
-      } else {
+    setTimeout(() => {
+      if (currentIndex < questions.length - 1) {
         setCurrentIndex(currentIndex + 1);
         setExitDirection(null);
+      } else {
+        // Convert to object format for compatibility
+        const answersObj = {};
+        [...answers, answer].forEach(a => {
+          answersObj[a.question] = a.answer;
+        });
+        onComplete(answersObj);
       }
-      timeoutRef.current = null;
     }, 300);
   };
 
   const handleBackToPrevious = () => {
     if (currentIndex > 0) {
-      const newAnswers = { ...answers };
-      // Remove answer for current question before going back
-      delete newAnswers[currentQuestion.question];
       setCurrentIndex(currentIndex - 1);
-      setAnswers(newAnswers);
+      setAnswers(answers.slice(0, -1));
     }
   };
 
-  // Safety check: if no questions or current question is missing
+  const handleBackToMenu = () => {
+    if (window.confirm('Kembali ke menu utama? Progress akan hilang.')) {
+      onBack();
+    }
+  };
+
+  const handleDragEnd = (event, info) => {
+    if (info.offset.x > 100) {
+      handleSwipe('right');
+    } else if (info.offset.x < -100) {
+      handleSwipe('left');
+    }
+  };
+
   if (!questions || questions.length === 0 || !currentQuestion) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#FFA654] to-[#FF7F50]">
@@ -87,20 +85,20 @@ const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => 
   const modeColor = mode === 'duet' ? 'bg-[#FF7F89]' : 'bg-[#FFA654]';
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF7ED] to-white p-6">
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-['Poppins'] font-semibold text-[#FFA654]">
+    <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF7ED] to-white p-3 sm:p-4">
+      {/* Progress bar - outside card */}
+      <div className="mb-3 sm:mb-4">
+        <div className="flex justify-between items-center mb-2.5 sm:mb-3">
+          <span className="text-base sm:text-lg font-['Poppins'] font-bold text-[#FFA654]">
             Pertanyaan {currentIndex + 1}/{questions.length}
           </span>
           {mode === 'duet' && (
-            <span className="text-sm font-['Poppins'] text-gray-600">
+            <span className="text-sm sm:text-base font-['Poppins'] font-semibold text-gray-600">
               {currentUser === 'A' ? '👤 Kamu' : '💞 Pasangan'}
             </span>
           )}
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-2 sm:h-2.5 bg-gray-200 rounded-full overflow-hidden">
           <motion.div
             className={`h-full ${modeColor} rounded-full`}
             initial={{ width: 0 }}
@@ -110,11 +108,11 @@ const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => 
         </div>
       </div>
 
-      {/* Card container */}
-      <div className="flex-1 relative flex items-center justify-center">
+      {/* Card container - fills available space */}
+      <div className="flex-1 relative flex items-center justify-center min-h-0 mb-4 sm:mb-5">
         {/* Background cards for depth effect */}
         {currentIndex < questions.length - 1 && (
-          <div className="absolute w-full max-w-sm h-[500px] bg-white rounded-3xl shadow-lg scale-95 opacity-50" />
+          <div className="absolute inset-0 max-w-md mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-lg scale-95 opacity-50" />
         )}
 
         {/* Main card */}
@@ -123,105 +121,96 @@ const QuestionSwipe = ({ questions, onComplete, mode, currentUser, onBack }) => 
             style={{ x, rotate, opacity }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(event, info) => {
-              if (info.offset.x > 100) {
-                handleSwipe('right');
-              } else if (info.offset.x < -100) {
-                handleSwipe('left');
-              }
-            }}
-            className="absolute w-full max-w-sm h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+            onDragEnd={handleDragEnd}
+            className="absolute inset-0 max-w-md mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing flex flex-col"
           >
-            {/* Image */}
-            <div className="h-3/5 relative overflow-hidden">
+            {/* Image - takes 70% */}
+            <div className="flex-[7] relative overflow-hidden min-h-0">
               <img
                 src={currentQuestion.image}
                 alt={currentQuestion.question}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute top-4 right-4 text-5xl">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="absolute top-3 sm:top-4 right-3 sm:right-4 text-4xl sm:text-5xl">
                 {currentQuestion.emoji}
+              </div>
+              
+              {/* Swipe hint overlay */}
+              <div className="absolute bottom-0 left-0 right-0 pb-3 px-4 text-center">
+                <p className="text-white/80 text-xs sm:text-sm font-['Poppins'] font-medium drop-shadow-lg">
+                  ← Swipe atau tap tombol →
+                </p>
               </div>
             </div>
 
-            {/* Question */}
-            <div className="h-2/5 p-6 flex flex-col justify-center">
-              <h3 className="text-2xl font-['Poppins'] font-semibold text-[#FFA654] text-center mb-4">
-                {currentQuestion.question}
-              </h3>
+            {/* Question & Buttons - takes 30% */}
+            <div className="flex-[3] flex flex-col justify-center p-4 sm:p-5 min-h-0">
+              {/* Question */}
+              <div className="mb-4 sm:mb-5">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-['Poppins'] font-semibold text-[#FFA654] text-center px-2 leading-tight">
+                  {currentQuestion.question}
+                </h3>
+              </div>
               
-              {/* Swipe indicators */}
-              <div className="flex justify-between items-center text-sm font-['Poppins']">
-                <div className="flex items-center gap-2 text-red-500">
-                  <X className="w-5 h-5" />
-                  <span>{currentQuestion.options?.left || 'Tidak'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-green-500">
-                  <span>{currentQuestion.options?.right || 'Ya'}</span>
-                  <Check className="w-5 h-5" />
-                </div>
+              {/* YES/NO buttons at bottom of card */}
+              <div className="flex justify-center gap-6 sm:gap-8">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleSwipe('left')}
+                  className="flex flex-col items-center justify-center gap-1.5 group"
+                >
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 bg-red-50 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all border-2 border-red-300 group-hover:bg-red-100">
+                    <X className="w-8 h-8 sm:w-9 sm:h-9 text-red-500 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-sm sm:text-base font-['Poppins'] font-semibold text-red-500">
+                    {currentQuestion.options?.left || 'Tidak'}
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleSwipe('right')}
+                  className="flex flex-col items-center justify-center gap-1.5 group"
+                >
+                  <div className="w-16 h-16 sm:w-18 sm:h-18 bg-green-50 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all border-2 border-green-300 group-hover:bg-green-100">
+                    <Check className="w-8 h-8 sm:w-9 sm:h-9 text-green-500 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-sm sm:text-base font-['Poppins'] font-semibold text-green-500">
+                    {currentQuestion.options?.right || 'Ya'}
+                  </span>
+                </motion.button>
               </div>
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* Swipe buttons */}
-      <div className="flex justify-center gap-8 mt-6 mb-4">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleSwipe('left')}
-          className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-        >
-          <X className="w-8 h-8 text-white" />
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => handleSwipe('right')}
-          className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
-        >
-          <Check className="w-8 h-8 text-white" />
-        </motion.button>
-      </div>
-
-      {/* Instructions */}
-      <p className="text-center text-sm text-gray-500 font-['Poppins'] mb-4">
-        Swipe kanan untuk Ya, swipe kiri untuk Tidak
-      </p>
-
-      {/* Navigation buttons */}
+      {/* Navigation buttons - larger and at bottom */}
       <div className="flex justify-between gap-4 px-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleBackToPrevious}
           disabled={currentIndex === 0}
-          className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-600 py-3 rounded-full font-['Poppins'] font-semibold hover:border-[#FFA654] hover:text-[#FFA654] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-600 py-3.5 sm:py-4 rounded-full font-['Poppins'] font-semibold hover:border-[#FFA654] hover:text-[#FFA654] transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-base sm:text-lg shadow-md"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Kembali</span>
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (window.confirm('Kembali ke menu utama? Progress akan hilang.')) {
-              onBack();
-            }
-          }}
-          className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-600 py-3 rounded-full font-['Poppins'] font-semibold hover:border-[#FFA654] hover:text-[#FFA654] transition-colors"
+          onClick={handleBackToMenu}
+          className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-300 text-gray-600 py-3.5 sm:py-4 rounded-full font-['Poppins'] font-semibold hover:border-[#FFA654] hover:text-[#FFA654] transition-colors text-base sm:text-lg shadow-md"
         >
-          <Home className="w-4 h-4" />
+          <Home className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Menu</span>
         </motion.button>
       </div>
     </div>
   );
-};
-
-export default QuestionSwipe;
+}
