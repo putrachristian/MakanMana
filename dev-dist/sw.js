@@ -108,13 +108,5 @@ define(['./workbox-47da91e0'], (function (workbox) { 'use strict';
       maxAgeSeconds: 604800
     })]
   }), 'GET');
-  workbox.registerRoute(/^https:\/\/serpapi\.com\/.*/i, new workbox.NetworkFirst({
-    "cacheName": `serpapi-cache-${CACHE_VERSION}`,
-    "networkTimeoutSeconds": 10,
-    plugins: [new workbox.ExpirationPlugin({
-      maxEntries: 50,
-      maxAgeSeconds: 3600
-    })]
-  }), 'GET');
 
 }));

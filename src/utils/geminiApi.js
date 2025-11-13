@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
 import { getRestaurantImage, searchUnsplashImage } from './unsplashApi';
-import { getRestaurantImageFromSerp } from './serpApi';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -388,14 +387,11 @@ PENTING: Cari restoran di seluruh kota ${location.city}, bukan hanya area terten
       console.warn(`Received only ${recommendations.length} recommendations, expected 3`);
     }
 
-    // Validate and format recommendations with SerpAPI images
+    // Validate and format recommendations with Pexels images
     const recommendationsWithImages = await Promise.all(
       recommendations.map(async (rec, index) => {
-        // Get image from SerpAPI based on restaurant name/category
-        // let imageUrl = rec.image;
-        // if (!imageUrl) {
-          let imageUrl = await getRestaurantImageFromSerp(rec);
-        // }
+        // Get image from Pexels based on restaurant name/category
+        let imageUrl = await getRestaurantImage(rec);
 
         // Use Google Maps URL from Gemini response, no fallback
         const googleMapsUrl = rec.googleMapsUrl || null;

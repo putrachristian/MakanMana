@@ -1,14 +1,36 @@
 import { motion } from 'motion/react';
-import { User, Users } from 'lucide-react';
+import { User, Users, MapPin } from 'lucide-react';
 
-export default function ModeSelect({ onSelect }) {
+export default function ModeSelect({ onSelect, location }) {
+  // Format location info for display
+  const getLocationInfo = () => {
+    if (!location) return null;
+    
+    if (location.type === 'current' && location.coordinates) {
+      return {
+        type: 'GPS',
+        text: 'Lokasi GPS (radius 5 km)',
+        icon: '📍'
+      };
+    } else if (location.type === 'city' && location.city) {
+      return {
+        type: 'Kota',
+        text: location.city,
+        icon: '🏙️'
+      };
+    }
+    return null;
+  };
+
+  const locationInfo = getLocationInfo();
+
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-b from-[#FFF7ED] to-white">
       {/* Title */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-6 sm:mb-8 md:mb-12 px-2"
+        className="text-center mb-4 sm:mb-6 md:mb-8 px-2"
       >
         <h2 className="text-xl sm:text-2xl md:text-3xl font-['Poppins'] font-semibold text-[#FFA654] mb-2 sm:mb-3">
           Mau makan sendiri atau bareng pasangan?
@@ -17,6 +39,29 @@ export default function ModeSelect({ onSelect }) {
           Pilih mode yang sesuai dengan kebutuhanmu
         </p>
       </motion.div>
+
+      {/* Location Info */}
+      {locationInfo && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="w-full max-w-md mb-4 sm:mb-6"
+        >
+          <div className="bg-white/80 backdrop-blur-sm border-2 border-[#FFA654]/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 shadow-sm">
+            <div className="text-2xl sm:text-3xl">{locationInfo.icon}</div>
+            <div className="flex-1">
+              <div className="text-xs sm:text-sm text-gray-500 font-['Poppins'] mb-0.5">
+                {locationInfo.type}
+              </div>
+              <div className="text-sm sm:text-base font-['Poppins'] font-semibold text-[#FFA654]">
+                {locationInfo.text}
+              </div>
+            </div>
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFA654]" />
+          </div>
+        </motion.div>
+      )}
 
       {/* Mode cards */}
       <div className="w-full max-w-md space-y-4 sm:space-y-6">

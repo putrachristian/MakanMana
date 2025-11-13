@@ -43,11 +43,18 @@ export default function LocationSelect({ onSelect }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        onSelect({ type: 'gps', latitude, longitude });
+        console.log('GPS location obtained:', { latitude, longitude });
+        onSelect({ 
+          type: 'current', 
+          coordinates: { latitude, longitude },
+          radius: '5 km'
+        });
         setIsLoadingGPS(false);
       },
       (err) => {
         console.error('Error getting GPS location:', err);
+        console.error('Error code:', err?.code);
+        console.error('Error message:', err?.message);
         setIsLoadingGPS(false);
         
         // Show user-friendly error message based on error code
@@ -75,9 +82,9 @@ export default function LocationSelect({ onSelect }) {
         }, 1500);
       },
       {
-        enableHighAccuracy: false, // Changed to false for better compatibility
-        timeout: 10000,
-        maximumAge: 300000 // Cache position for 5 minutes
+        enableHighAccuracy: true, // Use high accuracy for better results on Android
+        timeout: 15000, // Increased timeout for Android devices
+        maximumAge: 60000 // Cache position for 1 minute (reduced for fresher data)
       }
     );
   };

@@ -77,8 +77,7 @@ MakanMana? adalah solusi untuk masalah klasik: **"Mau makan apa hari ini?"**. Ap
 - **Frontend**: React + Vite
 - **AI**: Google Gemini AI (gemini-2.5-flash)
 - **Image Search**: 
-  - SerpAPI (Google Images) untuk gambar restoran
-  - Pexels API untuk gambar pertanyaan
+  - Pexels API untuk gambar restoran dan pertanyaan
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Deployment**: Vercel

@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Cache version - increment this when you want to invalidate all caches
-const CACHE_VERSION = '1.0.1';
+const CACHE_VERSION = '1.0.2';
 
 export default defineConfig({
   plugins: [
@@ -47,6 +47,7 @@ export default defineConfig({
           },
         ],
         prefer_related_applications: false,
+        permissions: ['geolocation'],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
@@ -76,18 +77,6 @@ export default defineConfig({
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/serpapi\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: `serpapi-cache-${CACHE_VERSION}`,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
-              },
-              networkTimeoutSeconds: 10,
             },
           },
         ],

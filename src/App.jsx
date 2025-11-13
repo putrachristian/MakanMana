@@ -98,6 +98,7 @@ export default function App() {
   };
 
   const handleLocationSelect = (selectedLocation) => {
+    console.log('Location selected:', selectedLocation);
     navigateToScreen('mode', { location: selectedLocation });
   };
 
@@ -125,6 +126,7 @@ export default function App() {
       setUserAAnswers(answers);
       navigateToScreen('loading');
       try {
+        console.log('Generating recommendations with location:', location);
         const results = await generateRecommendations(answers, location, mode);
         setRecommendations(results);
         navigateToScreen('result');
@@ -264,7 +266,7 @@ export default function App() {
         <div className={`h-full overflow-hidden ${screen !== 'splash' && screen !== 'loading' ? 'pt-14 sm:pt-16' : ''}`}>
           {screen === 'splash' && <SplashScreen onStart={handleStart} />}
           {screen === 'location' && <LocationSelect onSelect={handleLocationSelect} />}
-          {screen === 'mode' && <ModeSelect onSelect={handleModeSelect} />}
+          {screen === 'mode' && <ModeSelect onSelect={handleModeSelect} location={location} />}
           {screen === 'questions' && (
             <QuestionSwipe
               questions={questions}
