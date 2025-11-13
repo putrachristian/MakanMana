@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Cache version - increment this when you want to invalidate all caches
-const CACHE_VERSION = '1.0.2';
+const CACHE_VERSION = '1.0.3';
 
 export default defineConfig({
   plugins: [

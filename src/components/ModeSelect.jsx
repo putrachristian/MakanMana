@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { User, Users, MapPin } from 'lucide-react';
 
-export default function ModeSelect({ onSelect, location }) {
+export default function ModeSelect({ onSelect, location, onLocationClick }) {
   // Format location info for display
   const getLocationInfo = () => {
     if (!location) return null;
@@ -48,9 +48,14 @@ export default function ModeSelect({ onSelect, location }) {
           transition={{ delay: 0.1 }}
           className="w-full max-w-md mb-4 sm:mb-6"
         >
-          <div className="bg-white/80 backdrop-blur-sm border-2 border-[#FFA654]/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 shadow-sm">
+          <motion.button
+            onClick={onLocationClick}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-white/80 backdrop-blur-sm border-2 border-[#FFA654]/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 shadow-sm hover:shadow-md hover:border-[#FFA654]/50 transition-all cursor-pointer"
+          >
             <div className="text-2xl sm:text-3xl">{locationInfo.icon}</div>
-            <div className="flex-1">
+            <div className="flex-1 text-left">
               <div className="text-xs sm:text-sm text-gray-500 font-['Poppins'] mb-0.5">
                 {locationInfo.type}
               </div>
@@ -59,7 +64,7 @@ export default function ModeSelect({ onSelect, location }) {
               </div>
             </div>
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[#FFA654]" />
-          </div>
+          </motion.button>
         </motion.div>
       )}
 
